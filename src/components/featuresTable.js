@@ -1,6 +1,6 @@
 // Import module
 import { Grid, _ } from 'gridjs-react';
-import * as turf from '@turf/turf';
+import { centroid } from '@turf/turf';
 
 // Main react components for features/data table
 export default function FeaturesTable(props){
@@ -17,7 +17,7 @@ export default function FeaturesTable(props){
 		const indexZoom = _(
 			<div style={{ cursor: 'pointer' }} onClick={() => {
 				// Get centroid coordinates for zoom
-				const coords = turf.centroid(feat).geometry.coordinates;
+				const coords = centroid(feat).geometry.coordinates;
 				const newCoords = [ coords[1], coords[0] ];
 				Map.flyTo(newCoords, 18, { animate: true });
 			}}
@@ -41,8 +41,6 @@ export default function FeaturesTable(props){
 				resizable={true}
 				sort={true}
 				search={true}
-				height={'800px'}
-				fixedHeader={true}
 				style={{ table: { fontSize: 'small', height: '5px' } }}
 			/>
 		</div>

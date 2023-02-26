@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Select from 'react-select';
 import tj from '@mapbox/togeojson';
-import * as turf from '@turf/turf';
+import { centroid, area, toWgs84 } from '@turf/turf';
 import shp from 'shpjs';
 import DataBlock from '../components/dataBlock';
 import { render } from 'react-dom';
@@ -10,25 +10,173 @@ import color from '../components/color.js';
 import { Grid } from 'gridjs-react';
 
 // Export state
-export let type;
-export let format;
-let setFormat;
-export let file;
-export let data;
+let type;
+let format;
+let input;
+let response;
+let file;
+let data;
+let dataName;
 let Map;
 let DataPanel;
+const dataList = [];
 export const setMap = (valueMap, valuePanel) => {
 	// Set map
 	Map = valueMap;
-
 	// Set data render panel
 	DataPanel = valuePanel;
 };
-export const dataList = [];
-let dataName;
+
+// Add data section
+export default function AddData(){
+	const [addDisabled, setAddDisabled] = useState(true);
+	const [urlDisplay, setUrlDisplay] = useState('none');
+	const [uploadDisplay, setUploadDisplay] = useState('none');
+
+	// Options for vector
+	const vector = [
+		{ value: 'shp', label: 'Shapefile (zip)' },
+		{ value: 'geojson', label: 'GeoJSON' },
+		{ value: 'kml', label: 'KML' }
+	];
+
+	const raster = [
+		{ value: 'tiff', label: 'GeoTIFF' },
+	];
+
+	return (
+		<div className="section">
+			<Select 
+				options={[ { label: 'URL', value: 'url' }, { label: 'Upload file', value: 'upload' } ]}
+				placeholder='Select input'
+				onChange={(e) => {
+					setUrlDisplay('none');
+					setUploadDisplay('none');
+					input = e.value;
+					e.value == 'upload' ? setUploadDisplay('flex') : setUrlDisplay('flex');
+				}}
+			/>
+
+			<input 
+				type='url'
+				style={{ display: urlDisplay }}
+				onChange={ async (event) => {
+					// URL
+					const url = event.target.value;
+
+					if (isValidUrl(url)) {
+						// Options
+						const options = {
+							method: 'POST',
+							body: url,
+							headers: {
+								'Content-Type': 'text/plain'
+							}
+						}
+	
+						// Get file format
+						const splitName = url.split('.');
+						format = splitName[splitName.length - 1];
+						const splitName2 = splitName[splitName.length - 2].split('/');
+						dataName = splitName2[splitName.length - 1];
+						
+						// Fetch data from url
+						try {
+							response = await fetch('/api/url', options);
+						} catch (err){
+							alert(err);
+						}
+
+						// Enable button to add file to map
+						setAddDisabled(false)
+						
+					} else {
+						setAddDisabled(true)
+					}
+
+				}}
+			/>
+
+			<input 
+				type="file"
+				style={{ display: uploadDisplay }}
+				accept={'.zip, .geojson, .json, .kml, .kmz'}
+				onChange={(event) => {
+					const files = event.target.files;
+					files.length ? setAddDisabled(false) : setAddDisabled(true);
+					file = files[0];
+
+					const splitName = file.name.split('.');
+					format = splitName[splitName.length - 1];
+					dataName = splitName[0];
+				}}
+			/>
+
+			<button className='action' disabled={addDisabled} onClick={ async () => {
+				// Convert file to geojson
+				await dataConvert();
+
+				// Set data projection
+				if (format != 'tiff'){
+					area(data) < 0 ? data = toWgs84(data) : null;
+				}
+
+				// Add data to map
+				await addDataToMap();
+			}}>
+				Add data to map
+			</button>
+
+		</div>
+	)
+}
+
+async function dataConvert(){
+	// Obj file to convert
+	let obj = input == 'upload' ? file : response;
+
+	// Condiitonal for data parsing
+	switch (format) {
+		case 'json':
+		case 'geojson':
+			// Parse geojson
+			data = JSON.parse(await obj.text());
+			type = 'vector';
+			break;
+		case 'kml':
+		case 'kmz':
+			// Convert kml to geojson
+			data = tj.kml(new DOMParser().parseFromString(await obj.text(), 'application/xml'));
+			type = 'vector';
+			break;
+		case 'zip':
+			// Convert shp to geojson
+			obj = input == 'url' ? obj = new Blob([obj]) : obj;
+			data = await shp(await obj.arrayBuffer());
+			type = 'vector';
+			break;
+
+		/*
+		case 'tiff':
+			data = await file.arrayBuffer();
+			console.log(data)
+			break;
+		*/
+	}
+}
+
+// Function to check url
+function isValidUrl (urlString) {
+	try { 
+		return Boolean(new URL(urlString)); 
+	}
+	catch(e){ 
+		return false; 
+	}
+}
 
 // Export data to map function
-function addDataToMap() {
+async function addDataToMap() {
 	// Get random color
 	const palette = color();
 
@@ -41,7 +189,6 @@ function addDataToMap() {
 			} else {
 				layer = L.geoJSON(data, { style: { color: palette } })
 			}
-			dataList.push({ data: layer, type: type, name: dataName });
 
 			// Add pop up to each feature
 			layer.bindPopup((layer) => {
@@ -60,6 +207,7 @@ function addDataToMap() {
 				
 				// Render the react to html
 				render(grid, div);
+
 				// Return the div
 				return div;
 
@@ -67,9 +215,21 @@ function addDataToMap() {
 
 			break;
 
+		/*
 		case 'raster':
+			const options = {
+				sourceFunction: GeoTIFF.fromArrayBuffer,
+				arrayBuffer: data,
+				onError: (err) => console.log(err),
+				blockSize: 65536,
+			};
+			layer = L.leafletGeotiff(null, options);
 			break;
+		*/
 	}
+
+	// Push to list
+	dataList.push({ data: layer, type: type, name: dataName });
 
 	// Add layer to map
 	layer.addTo(Map);
@@ -90,118 +250,7 @@ function addDataToMap() {
 
 	// Zoom to the first object
 	if (dataList.length == 1) {
-		const coord = turf.centroid(data).geometry.coordinates;
+		const coord = centroid(data).geometry.coordinates;
 		Map.flyTo([coord[1], coord[0]], 10, { animate: true });
 	}
-}
-
-// Add data section
-export default function AddData(){
-	const dataType = [
-		{ value: 'raster', label: 'Image/Raster' },
-		{ value: 'vector', label: 'Table/Vector' }
-	];
-
-	[format, setFormat] = useState(null);
-	const [formatDisabled, setFormatDisabled] = useState(true);
-	const [formatOptions, setFormatOptions] = useState(null); 
-	const [uploadDisabled, setUploadDisabled] = useState(true);
-	const [uploadFormat, setUploadFormat] = useState(null);
-	const [addDisabled, setAddDisabled] = useState(true);
-
-	const vector = [
-		{ value: 'shp', label: 'Shapefile (zip)' },
-		{ value: 'geojson', label: 'GeoJSON' },
-		{ value: 'kml', label: 'KML' }
-	];
-
-	const raster = [
-		{ value: 'tiff', label: 'GeoTIFF' },
-	];
-
-	return (
-		<div className="section">
-			<Select 
-				options={dataType} 
-				placeholder='Select data type'
-				onChange={(event) => {
-					const value = event.value;
-					type = value;
-
-					setFormat(null);
-					setUploadDisabled(true);
-
-					value == 'raster' ? setFormatOptions(raster) : setFormatOptions(vector);
-					setFormatDisabled(false);
-				}}
-			/>
-
-			<Select
-				value={format}
-				options={formatOptions} 
-				placeholder='Select format'
-				isDisabled={formatDisabled}
-				onChange={(event) => {
-					setFormat(event);
-					const value = event.value;
-					format = event.value;
-
-					setUploadDisabled(false);
-
-					switch (value) {
-						case 'shp':
-							setUploadFormat('.zip');
-							break;
-						case 'geojson':
-							setUploadFormat('.json, .geojson');
-							break;
-						case 'kml':
-							setUploadFormat('.kml, .kmz');
-							break;
-						case 'tiff':
-							setUploadFormat('.geotiff, .tiff, .tif');
-							break;
-					}
-				}}
-			/>
-
-			<input 
-				type="file"
-				disabled={uploadDisabled}
-				accept={uploadFormat}
-				onChange={(event) => {
-					event.target.files.length ? setAddDisabled(false) : setAddDisabled(true);
-					file = event.target.files[0];
-					dataName = file.name.split('.')[0];
-				}}
-			/>
-
-			<button className='action' disabled={addDisabled} onClick={ async () => {
-				// Condiitonal for data parsing
-				switch (format.value) {
-					case 'geojson':
-						// Parse geojson
-						data = JSON.parse(await file.text());
-						break;
-					case 'kml':
-						// Convert kml to geojson
-						data = tj.kml(new DOMParser().parseFromString(await file.text(), 'application/xml'));
-						break;
-					case 'shp':
-						// Convert shp to geojson
-						data = await shp(await file.arrayBuffer());
-						break;
-				}
-
-				// Set data projection
-				turf.area(data) < 0 ? data = turf.toWgs84(data) : null;
-
-				// Add data to map
-				addDataToMap();
-			}}>
-				Add data to map
-			</button>
-
-		</div>
-	)
 }

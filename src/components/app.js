@@ -27,7 +27,7 @@ export default function App(){
 						// Initiate many state
 						initMap('map');
 						setMap(Map, dataPanelRef.current);
-						setModalPanel(setModalContent, setDisplayModal, setModalWidth)
+						setModalPanel(setModalContent, setDisplayModal, setModalWidth);
 					}}
 				/>
 
