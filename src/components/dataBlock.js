@@ -19,6 +19,7 @@ export default function DataBlock(props){
 	// Data leaflet
 	const data = props.data;
 	const geojson = props.geojson;
+	const Map = props.map;
 
 	// Color
 	const [color, setColor] = useState(props.color);
@@ -41,7 +42,7 @@ export default function DataBlock(props){
 				style={{ backgroundColor: 'whitesmoke', border: '0.5px solid grey', width: '30%', textAlign: 'center', cursor: 'pointer' }}
 				onClick={() => {
 					setDisplayModal('flex');
-					setModalContent(<FeaturesTable data={geojson} name={props.name} />);
+					setModalContent(<FeaturesTable data={geojson} name={props.name} map={Map} />);
 					setModalWidth('60%');
 				}}
 			>

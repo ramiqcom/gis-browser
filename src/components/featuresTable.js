@@ -1,13 +1,28 @@
 // Import module
-import { Grid } from 'gridjs-react';
+import { Grid, _ } from 'gridjs-react';
+import * as turf from '@turf/turf';
 
+// Main react components for features/data table
 export default function FeaturesTable(props){
+	// Main state
+	const Map = props.map;
 	const name = props.name;
 	const data = props.data;
-	console.log(data);
 
+	// Create array for table
 	const properties = Object.keys(data.features[0].properties);
-	const table = data.features.map((feat, index) => [ index, ...properties.map(prop => feat.properties[prop]) ]);
+	const table = data.features.map((feat, index) => {
+		const coords = turf.centroid(feat).geometry.coordinates;
+		const newCoords = [ coords[1], coords[0] ];
+
+		const indexZoom = _(
+			<div style={{ cursor: 'pointer' }} onClick={()  =>  Map.flyTo(newCoords, 15, { animate: true }) }>
+				{index}
+			</div>
+		)
+
+		return [ indexZoom, ...properties.map(prop => feat.properties[prop]), ...newCoords ]; 
+	});
 
 	return (
 		<div>
@@ -16,13 +31,14 @@ export default function FeaturesTable(props){
 			</div>
 
 			<Grid 
-				columns={['Index', ...properties]}
+				columns={['Index', ...properties, 'Lat', 'Lon' ]}
 				data={table}
 				resizable={true}
 				sort={true}
 				search={true}
 				height={'800px'}
 				fixedHeader={true}
+				style={{ table: { fontSize: 'small', height: '5px' } }}
 			/>
 		</div>
 	)

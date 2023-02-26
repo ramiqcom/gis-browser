@@ -18,7 +18,10 @@ export let data;
 let Map;
 let DataPanel;
 export const setMap = (valueMap, valuePanel) => {
+	// Set map
 	Map = valueMap;
+
+	// Set data render panel
 	DataPanel = valuePanel;
 };
 export const dataList = [];
@@ -80,6 +83,7 @@ function addDataToMap() {
 		color={palette}
 		data={layer}
 		geojson={data}
+		map={Map}
 		onChange={(event) => event.target.checked ? layer.setStyle({ opacity: 1, fillOpacity: 0.2 }) : layer.setStyle({ opacity: 0, fillOpacity: 0 }) }
 	/>
 	render(block, DataPanel.appendChild(div));
