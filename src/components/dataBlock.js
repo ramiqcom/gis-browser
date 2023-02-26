@@ -39,18 +39,20 @@ export default function DataBlock(props){
 			</div>
 
 			<div 
-				style={{ backgroundColor: 'whitesmoke', border: '0.5px solid grey', width: '30%', textAlign: 'center', cursor: 'pointer' }}
+				style={{ textAlign: 'center', cursor: 'pointer', justifyContent: 'center', display: 'flex', verticalAlign: 'center' }}
 				onClick={() => {
 					setDisplayModal('flex');
 					setModalContent(<FeaturesTable data={geojson} name={props.name} map={Map} />);
 					setModalWidth('60%');
 				}}
 			>
-				Table
+				<div>
+					&#9776;
+				</div>
 			</div>
 
 			<div 
-				style={{ backgroundColor: color, width: '10%', height: '20px', border: '0.5px solid gray', cursor: 'pointer' }} 
+				style={{ backgroundColor: color, width: '10%', border: '0.5px solid gray', cursor: 'pointer' }} 
 				onClick={() => colorDisplay == 'none' ? setColorDisplay('flex') : null}
 			>
 				<div 
