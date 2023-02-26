@@ -1,8 +1,8 @@
 // Import module
 import Script from 'next/script';
-import initMap, { Map, Tile, setTile } from './map.js';
+import initMap, { Map } from './map.js';
 import Modal, { setDisplayModal, setModalContent, setModalWidth } from '../components/modal.js';
-import AddData, { setMap, dataList } from '../components/addData.js';
+import AddData, { setMap } from '../components/addData.js';
 import DataPanel, { dataPanelRef } from '../components/dataPanel.js';
 import { setModalPanel } from '../components/dataBlock.js';
 

@@ -13,13 +13,15 @@ export default function FeaturesTable(props){
 	const properties = Object.keys(data.features[0].properties);
 	const table = data.features.map((feat, index) => {
 
-		// Get centroid coordinates for zoom
-		const coords = turf.centroid(feat).geometry.coordinates;
-		const newCoords = [ coords[1], coords[0] ];
-
 		// Click index for zoom to object
 		const indexZoom = _(
-			<div style={{ cursor: 'pointer' }} onClick={()  =>  Map.flyTo(newCoords, 18, { animate: true }) }>
+			<div style={{ cursor: 'pointer' }} onClick={() => {
+				// Get centroid coordinates for zoom
+				const coords = turf.centroid(feat).geometry.coordinates;
+				const newCoords = [ coords[1], coords[0] ];
+				Map.flyTo(newCoords, 18, { animate: true });
+			}}
+			>
 				{index}
 			</div>
 		)
