@@ -1,6 +1,7 @@
 // Import modules
 import { useRef } from "react";
 
+// Export the panel ref
 export let dataPanelRef;
 
 // Export data panel

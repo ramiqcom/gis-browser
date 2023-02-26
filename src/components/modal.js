@@ -1,5 +1,5 @@
 // Import module
-import { use, useState } from "react";
+import { useState } from "react";
 
 // Export
 export let displayModal;

@@ -1,5 +1,7 @@
+// Import module
 import { useState } from "react"
 
+// Export checkbox components
 export default function Checkbox(props){
 	const [check, setCheck] = useState(true);
 
