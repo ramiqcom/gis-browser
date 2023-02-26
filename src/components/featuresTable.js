@@ -13,6 +13,7 @@ export default function FeaturesTable(props){
 	const properties = Object.keys(data.features[0].properties);
 	const table = data.features.map((feat, index) => {
 
+		// Get centroid coordinates for zoom
 		const coords = turf.centroid(feat).geometry.coordinates;
 		const newCoords = [ coords[1], coords[0] ];
 
@@ -23,7 +24,7 @@ export default function FeaturesTable(props){
 			</div>
 		)
 
-		return [ indexZoom, ...properties.map(prop => feat.properties[prop]), ...newCoords ]; 
+		return [ indexZoom, ...properties.map(prop => feat.properties[prop]) ]; 
 	});
 
 	return (
@@ -33,7 +34,7 @@ export default function FeaturesTable(props){
 			</div>
 
 			<Grid 
-				columns={['Index', ...properties, 'Lat', 'Lon' ]}
+				columns={['Index', ...properties ]}
 				data={table}
 				resizable={true}
 				sort={true}
