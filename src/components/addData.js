@@ -12,8 +12,8 @@ import { Grid } from 'gridjs-react';
 // Export state
 let type;
 let format;
-let input;
 let file;
+let input;
 let data;
 let dataName;
 let Map;
@@ -24,6 +24,16 @@ export const setMap = (valueMap, valuePanel) => {
 	Map = valueMap;
 	// Set data render panel
 	DataPanel = valuePanel;
+};
+export const setFile = (value) =>  {
+	// Set file value
+	file = value;
+
+	// Set name and format of file
+	fileParam(file)
+
+	// Convert + add data to map
+	initData();
 };
 
 // Add data section
@@ -89,9 +99,9 @@ export default function AddData(){
 						// Options
 						const options = {
 							method: 'POST',
-							body: JSON.stringify({ url, mime }),
+							body: url,
 							headers: {
-								'Content-Type': 'application/json',
+								'Content-Type': 'text/plain',
 							}
 						}
 
@@ -123,25 +133,13 @@ export default function AddData(){
 					const files = event.target.files;
 					files.length ? setAddDisabled(false) : setAddDisabled(true);
 					file = files[0];
-
-					const splitName = file.name.split('.');
-					format = splitName[splitName.length - 1];
-					dataName = splitName[0];
+					
+					// Set name and format of file
+					fileParam(file)
 				}}
 			/>
 
-			<button className='action' disabled={addDisabled} onClick={ async () => {
-				// Convert file to geojson
-				await dataConvert();
-
-				// Set data projection
-				if (format != 'tiff'){
-					area(data) < 0 ? data = toWgs84(data) : null;
-				}
-
-				// Add data to map
-				await addDataToMap();
-			}}>
+			<button className='action' disabled={addDisabled} onClick={initData}>
 				Add data to map
 			</button>
 
@@ -149,6 +147,38 @@ export default function AddData(){
 	)
 }
 
+// Function to set name and data format
+function fileParam(file){
+	const splitName = file.name.split('.');
+	format = splitName[splitName.length - 1];
+	dataName = splitName[0];
+}
+
+// Function to check url
+function isValidUrl (urlString) {
+	try { 
+		return Boolean(new URL(urlString)); 
+	}
+	catch(e){ 
+		return false; 
+	}
+}
+
+// Function to convert and add data to map
+async function initData(){
+	// Convert file to geojson
+	await dataConvert();
+
+	// Set data projection
+	if (format != 'tiff'){
+		area(data) < 0 ? data = toWgs84(data) : null;
+	}
+
+	// Add data to map
+	await addDataToMap();
+}
+
+// Convert file to data
 async function dataConvert(){
 	// Condiitonal for data parsing
 	switch (format) {
@@ -166,7 +196,6 @@ async function dataConvert(){
 			break;
 		case 'zip':
 			// Convert shp to geojson
-			console.log(file);
 			data = await shp(await file.arrayBuffer());
 			type = 'vector';
 			break;
@@ -180,18 +209,8 @@ async function dataConvert(){
 	}
 }
 
-// Function to check url
-function isValidUrl (urlString) {
-	try { 
-		return Boolean(new URL(urlString)); 
-	}
-	catch(e){ 
-		return false; 
-	}
-}
-
 // Export data to map function
-async function addDataToMap() {
+export async function addDataToMap() {
 	// Get random color
 	const palette = color();
 

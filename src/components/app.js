@@ -2,18 +2,27 @@
 import Script from 'next/script';
 import initMap, { Map } from './map.js';
 import Modal, { setDisplayModal, setModalContent, setModalWidth } from '../components/modal.js';
-import AddData, { setMap } from '../components/addData.js';
+import AddData, { setMap, setFile } from '../components/addData.js';
 import DataPanel, { dataPanelRef } from '../components/dataPanel.js';
 import { setModalPanel } from '../components/dataBlock.js';
 
 // Main function
 export default function App(){
 	return (
-		<div style={{ width: '100%', height: '100vh' }}>
+		<div 
+			style={{ width: '100%', height: '100vh' }}
+		>
 
 			<Modal />
 
-			<div style={{ height: '100%', width: '100%', display: 'flex', flexDirection:'column' }}>
+			<div 
+				style={{ height: '100%', width: '100%', display: 'flex', flexDirection:'column' }}
+				onDrop={async (e) => {
+					e.preventDefault();
+					setFile(e.dataTransfer.files[0]);
+				}}
+				onDragOver={e => e.preventDefault()}
+			>
 
 				<Header />
 				<Main />
