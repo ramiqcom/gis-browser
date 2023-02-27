@@ -13,7 +13,6 @@ import { Grid } from 'gridjs-react';
 let type;
 let format;
 let input;
-let response;
 let file;
 let data;
 let dataName;
@@ -64,25 +63,44 @@ export default function AddData(){
 					// URL
 					const url = event.target.value;
 
-					if (isValidUrl(url)) {
-						// Options
-						const options = {
-							method: 'POST',
-							body: url,
-							headers: {
-								'Content-Type': 'text/plain'
-							}
-						}
-	
+					if (isValidUrl(url)) {	
 						// Get file format
 						const splitName = url.split('.');
 						format = splitName[splitName.length - 1];
 						const splitName2 = splitName[splitName.length - 2].split('/');
 						dataName = splitName2[splitName.length - 1];
+
+						// MIME
+						let mime;
+						switch (format) {
+							case 'json':
+							case 'geojson':
+								mime = 'application/json';
+								break;
+							case 'kml':
+							case 'kmz':
+								mime = 'application/xml';
+								break;
+							case 'zip':
+								mime = 'application/x-compressed-zip'
+								break;
+						}
 						
+						// Options
+						const options = {
+							method: 'POST',
+							body: JSON.stringify({ url, mime }),
+							headers: {
+								'Content-Type': 'application/json',
+							}
+						}
+
 						// Fetch data from url
 						try {
-							response = await fetch('/api/url', options);
+							const response = await fetch('api/url', options);
+							const result = await response.text();
+							const response64 = await fetch(`data:${mime};base64,${result}`);
+							file = await response64.blob();
 						} catch (err){
 							alert(err);
 						}
@@ -132,27 +150,24 @@ export default function AddData(){
 }
 
 async function dataConvert(){
-	// Obj file to convert
-	let obj = input == 'upload' ? file : response;
-
 	// Condiitonal for data parsing
 	switch (format) {
 		case 'json':
 		case 'geojson':
 			// Parse geojson
-			data = JSON.parse(await obj.text());
+			data = JSON.parse(await file.text());
 			type = 'vector';
 			break;
 		case 'kml':
 		case 'kmz':
 			// Convert kml to geojson
-			data = tj.kml(new DOMParser().parseFromString(await obj.text(), 'application/xml'));
+			data = tj.kml(new DOMParser().parseFromString(await file.text(), 'application/xml'));
 			type = 'vector';
 			break;
 		case 'zip':
 			// Convert shp to geojson
-			obj = input == 'url' ? obj = new Blob([obj]) : obj;
-			data = await shp(await obj.arrayBuffer());
+			console.log(file);
+			data = await shp(await file.arrayBuffer());
 			type = 'vector';
 			break;
 
