@@ -166,16 +166,20 @@ function isValidUrl (urlString) {
 
 // Function to convert and add data to map
 async function initData(){
-	// Convert file to geojson
-	await dataConvert();
+	try {
+		// Convert file to geojson
+		await dataConvert();
 
-	// Set data projection
-	if (format != 'tiff'){
-		area(data) < 0 ? data = toWgs84(data) : null;
+		// Set data projection
+		if (format != 'tiff'){
+			area(data) < 0 ? data = toWgs84(data) : null;
+		}
+
+		// Add data to map
+		await addDataToMap();
+	} catch (err) {
+		alert (err);
 	}
-
-	// Add data to map
-	await addDataToMap();
 }
 
 // Convert file to data
@@ -198,6 +202,12 @@ async function dataConvert(){
 			// Convert shp to geojson
 			data = await shp(await file.arrayBuffer());
 			type = 'vector';
+			break;
+		case 'shp':
+			alert('Upload shapefile in zip!');
+			break;
+		default:
+			alert('Only accept shapefile in ZIP, GeoJSON, JSON, KML, and KMZ');
 			break;
 
 		/*
