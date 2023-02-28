@@ -285,12 +285,12 @@ export async function addDataToMap() {
 	}
 
 	// Update map and UI
-	updateMap({ value: data, type, label: dataName, palette, layer })
+	updateMap({ value: data, type, label: dataName, palette, layer, geometry: data.features[0].geometry.type })
 }
 
 // Function to render the data and update the data list
 export function updateMap(props){
-	const { value, label, type, layer, palette } = props;
+	const { value, label, type, layer, palette, geometry } = props;
 
 	// Push to list
 	dataList.push(props);

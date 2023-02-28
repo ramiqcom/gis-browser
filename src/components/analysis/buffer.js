@@ -66,7 +66,7 @@ export default function Buffer (props) {
 					onClick={() => {
 						const value = buffer(layer.value, radius, { units: units.value, steps: steps });
 						const label = `Buffer_${radius}_${units.label}_${layer.label}`;
-						addResult({ value, label });
+						addResult({ value, label, geometry: 'Polygon' });
 					}}
 				>
 					Run
