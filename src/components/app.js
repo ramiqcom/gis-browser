@@ -1,11 +1,10 @@
 // Import module
 import Script from 'next/script';
-import initMap, { Map } from './map.js';
-import Modal, { setDisplayModal, setModalContent, setModalWidth } from '../components/modal.js';
-import AddData, { setMap, setFile, dataList } from '../components/addData.js';
-import DataPanel, { dataPanelRef } from '../components/dataPanel.js';
-import { setModalPanel } from '../components/dataBlock.js';
-import AnalysisPage, { setModalPanelAnalysis, setDataList } from './analysisPage.js';
+import initMap from './map';
+import Modal, { setDisplayModal, setModalContent, setModalWidth } from './modal';
+import AddData, { setFile } from './addData';
+import DataPanel from './dataPanel';
+import AnalysisPage from './analysisPage';
 
 // Main function
 export default function App(){
@@ -18,11 +17,6 @@ export default function App(){
 
 			<div 
 				style={{ height: '100%', width: '100%', display: 'flex', flexDirection:'column' }}
-				onDrop={async (e) => {
-					e.preventDefault();
-					setFile(e.dataTransfer.files[0]);
-				}}
-				onDragOver={e => e.preventDefault()}
 			>
 
 				<Header />
@@ -36,10 +30,6 @@ export default function App(){
 					onLoad={() => {
 						// Initiate application state
 						initMap('map');
-						setMap(Map, dataPanelRef.current);
-						setModalPanel(setModalContent, setDisplayModal, setModalWidth);
-						setModalPanelAnalysis(setModalContent, setDisplayModal);
-						setDataList(dataList);
 					}}
 				/>
 
@@ -106,8 +96,13 @@ function LeftPanel(){
 // View panel
 function View(){
 	return (
-		<div id='map'>
-
+		<div id='map'
+			onDrop={async (e) => {
+				e.preventDefault();
+				setFile(e.dataTransfer.files[0]);
+			}}
+			onDragOver={e => e.preventDefault()}
+		>
 		</div>
 	)
 }

@@ -1,23 +1,20 @@
 // Import modules
-import { buffer, simplify, dissolve, voronoi, concave, convex } from '@turf/turf';
+import { useState } from 'react';
+import Select from 'react-select';
+import { updateMap } from './addData';
+import color from './color';
+import { setDisplayModal, setModalContent, setModalWidth } from './modal';
+import { dataList } from './addData';
+import Buffer from './analysis/buffer';
 
 // Export state
-let setModalContent;
-let setDisplayModal;
-let dataList;
-export const setDataList = (value) => dataList = value;
-export const setModalPanelAnalysis = (value, display) => {
-	setModalContent = value;
-	setDisplayModal = display;
-};
+let layer;
+let setLayer;
 
 // Analysis page
 export default function AnalysisPage(){
-
 	const analysisList = [
-		{ name: 'Buffer' },
-		{ name: 'Simplify' },
-		{ name: 'Dissolve' },
+		{ name: 'Buffer', panel: <Buffer /> }
 	];
 
 	return (
@@ -26,7 +23,7 @@ export default function AnalysisPage(){
 				analysisList.map((dict, index) => {
 					return (
 						<div style={{ display: 'flex', flexDirection: 'column' }} key={index} >
-							<button style={{ height: '100%' }}>
+							<button style={{ height: '100%' }} onClick={() => openAnalysis(dict.panel)}>
 								{dict.name}
 							</button>
 						</div>
@@ -37,11 +34,35 @@ export default function AnalysisPage(){
 	)
 }
 
-// Analysis modal components
-function AnalysisBox (props) {
-	return (
-		<div className="section">
+// File select
+export function SelectData (props) {
+	[layer, setLayer] = useState(null);
 
+	return (
+		<div>
+			<Select 
+				options={dataList}
+				value={layer}
+				onChange={event => {
+					setLayer(event);
+					props.onChange(event);
+				}}
+			/>
 		</div>	
 	)
+}
+
+// Function to add result to map
+export function addResult(props){
+	props.palette = color();
+	props.layer = L.geoJSON(props.value, { style: { color: props.palette, fillColor: props.palette } });
+	props.type = 'vector';
+	updateMap(props);
+}
+
+// Function to open modal
+function openAnalysis(components){
+	setModalContent(components);
+	setModalWidth('15%')
+	setDisplayModal('flex');
 }

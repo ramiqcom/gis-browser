@@ -33,6 +33,11 @@
   gap: 20px;
 }
 
+.paramSection {
+  display: flex;
+  flex-direction: column;
+}
+
 .dataBlock {
   display: flex;
   flex-direction: column;

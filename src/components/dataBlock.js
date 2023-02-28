@@ -2,25 +2,14 @@
 import { useState } from "react";
 import Checkbox from "./checkbox";
 import { colorList } from "./color";
-import FeaturesTable from '../components/featuresTable';
-
-// Export state
-export let setModalContent;
-export let setDisplayModal;
-export let setModalWidth;
-export const setModalPanel = (value, display, width) => {
-	setModalContent = value;
-	setDisplayModal = display;
-	setModalWidth = width;
-}
+import FeaturesTable from './featuresTable';
+import { setModalWidth, setDisplayModal, setModalContent } from "./modal";
 
 // Modular components
 export default function DataBlock(props){
 	// Data leaflet
-	const data = props.data;
-	const geojson = props.geojson;
-	const Map = props.map;
-
+	const { data, geojson, map: Map } = props;
+	
 	// Color
 	const [color, setColor] = useState(props.color);
 

@@ -5,9 +5,7 @@ import { centroid } from '@turf/turf';
 // Main react components for features/data table
 export default function FeaturesTable(props){
 	// Main state
-	const Map = props.map;
-	const name = props.name;
-	const data = props.data;
+	const { map: Map, name, data } = props;
 
 	// Create array for table
 	const properties = Object.keys(data.features[0].properties);

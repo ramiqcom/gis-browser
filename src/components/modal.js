@@ -2,9 +2,9 @@
 import { useState } from "react";
 
 // Export
-export let displayModal;
+let displayModal;
 export let setDisplayModal = (value) => displayModal = value;
-export let modalContent;
+let modalContent;
 export let setModalContent = (value) => modalContent = value;
 let modalWidth;
 export let setModalWidth = (value) => modalWidth = value;

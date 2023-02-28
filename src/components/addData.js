@@ -4,10 +4,12 @@ import Select from 'react-select';
 import tj from '@mapbox/togeojson';
 import { centroid, area, toWgs84 } from '@turf/turf';
 import shp from 'shpjs';
-import DataBlock from '../components/dataBlock';
+import DataBlock from './dataBlock';
 import { render } from 'react-dom';
-import color from '../components/color.js';
+import color from './color';
 import { Grid } from 'gridjs-react';
+import { Map } from './map'
+import { dataPanelRef } from './dataPanel';
 
 // Export state
 let type;
@@ -16,15 +18,7 @@ let file;
 let input;
 let data;
 let dataName;
-let Map;
-let DataPanel;
 export const dataList = [];
-export const setMap = (valueMap, valuePanel) => {
-	// Set map
-	Map = valueMap;
-	// Set data render panel
-	DataPanel = valuePanel;
-};
 export const setFile = (value) =>  {
 	// Set file value
 	file = value;
@@ -68,6 +62,7 @@ export default function AddData(){
 
 			<input 
 				type='url'
+				placeholder='Input url here'
 				style={{ display: urlDisplay }}
 				onChange={ async (event) => {
 					// URL
@@ -289,8 +284,16 @@ export async function addDataToMap() {
 		*/
 	}
 
+	// Update map and UI
+	updateMap({ value: data, type, label: dataName, palette, layer })
+}
+
+// Function to render the data and update the data list
+export function updateMap(props){
+	const { value, label, type, layer, palette } = props;
+
 	// Push to list
-	dataList.push({ data: layer, type: type, name: dataName });
+	dataList.push(props);
 
 	// Add layer to map
 	layer.addTo(Map);
@@ -298,16 +301,16 @@ export async function addDataToMap() {
 	// Data block
 	const div = document.createElement('div');
 	const block = <DataBlock 
-		name={dataName} 
+		name={label} 
 		type={type} 
 		container={div} 
 		color={palette}
 		data={layer}
-		geojson={data}
+		geojson={value}
 		map={Map}
 		onChange={(event) => event.target.checked ? layer.setStyle({ opacity: 1, fillOpacity: 0.2 }) : layer.setStyle({ opacity: 0, fillOpacity: 0 }) }
 	/>
-	render(block, DataPanel.appendChild(div));
+	render(block, dataPanelRef.current.appendChild(div));
 
 	// Zoom to the first object
 	if (dataList.length == 1) {
