@@ -2,9 +2,10 @@
 import Script from 'next/script';
 import initMap, { Map } from './map.js';
 import Modal, { setDisplayModal, setModalContent, setModalWidth } from '../components/modal.js';
-import AddData, { setMap, setFile } from '../components/addData.js';
+import AddData, { setMap, setFile, dataList } from '../components/addData.js';
 import DataPanel, { dataPanelRef } from '../components/dataPanel.js';
 import { setModalPanel } from '../components/dataBlock.js';
+import AnalysisPage, { setModalPanelAnalysis, setDataList } from './analysisPage.js';
 
 // Main function
 export default function App(){
@@ -33,10 +34,12 @@ export default function App(){
 					integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
 					crossOrigin=""
 					onLoad={() => {
-						// Initiate many state
+						// Initiate application state
 						initMap('map');
 						setMap(Map, dataPanelRef.current);
 						setModalPanel(setModalContent, setDisplayModal, setModalWidth);
+						setModalPanelAnalysis(setModalContent, setDisplayModal);
+						setDataList(dataList);
 					}}
 				/>
 
@@ -113,7 +116,10 @@ function View(){
 function RightPanel(){
 	return (
 		<div id='rightPanel' className="panel">
-
+			<div style={{ textAlign: 'center', fontWeight: 'bold' }}>
+				Analysis Tools
+			</div>
+			<AnalysisPage />
 		</div>	
 	)
 }

@@ -18,7 +18,7 @@ let data;
 let dataName;
 let Map;
 let DataPanel;
-const dataList = [];
+export const dataList = [];
 export const setMap = (valueMap, valuePanel) => {
 	// Set map
 	Map = valueMap;
@@ -177,9 +177,26 @@ async function initData(){
 
 		// Add data to map
 		await addDataToMap();
+
+		// Clear all data
+		clearData()
 	} catch (err) {
+		// Clear all data
+		clearData()
+
+		// Alert error
 		alert (err);
 	}
+}
+
+// Function to clear all data after adding
+function clearData(){
+	type = null;
+	format = null;
+	file = null;
+	input = null;
+	data = null;
+	dataName = null;
 }
 
 // Convert file to data
