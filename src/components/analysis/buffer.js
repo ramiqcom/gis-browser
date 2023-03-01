@@ -3,6 +3,7 @@ import { useState } from "react";
 import { SelectData, addResult } from '../analysisPage';
 import { buffer } from '@turf/turf';
 import Select from 'react-select';
+import { layer } from '../analysisPage';
 
 // Analysis modal components
 export default function Buffer (props) {

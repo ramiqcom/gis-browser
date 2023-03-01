@@ -8,7 +8,7 @@ import { dataList } from './addData';
 import Buffer from './analysis/buffer';
 
 // Export state
-let layer;
+export let layer;
 let setLayer;
 
 // Analysis page
